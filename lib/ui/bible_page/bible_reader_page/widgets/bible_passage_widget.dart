@@ -6,9 +6,11 @@ import '../../../../data/model/bible_chapter_content.dart';
 
 class BiblePassageWidget extends StatelessWidget {
   final BibleChapterContent content;
+  final bool isFirstVerse;
   const BiblePassageWidget({
     Key key,
-    this.content,
+    @required this.content,
+    @required this.isFirstVerse,
   }) : super(key: key);
 
   static const Map<String, int> superScriptCharCodes = {
@@ -32,10 +34,10 @@ class BiblePassageWidget extends StatelessWidget {
           text: content.passageTitle + '\n',
           children: [
             TextSpan(
-              text: (content.verse == 1)
+              text: (isFirstVerse)
                   ? content.verse.toString()
                   : convertVerseNumberToSuperScript(),
-              style: (content.verse == 1) ? firstVerseStyle : commonVerseStyle,
+              style: (isFirstVerse) ? firstVerseStyle : commonVerseStyle,
             ),
             TextSpan(
               text: content.text.replaceAll('[pas_title]', ''),
@@ -43,25 +45,25 @@ class BiblePassageWidget extends StatelessWidget {
             ),
           ],
           style: TextStyle(
-            fontSize: ScreenUtil().setSp(50),
+            fontSize: ScreenUtil().setSp(70),
             fontWeight: FontWeight.bold,
           ),
         ),
+        textAlign: TextAlign.justify,
       );
     } else {
       return Text.rich(
         TextSpan(
-          text: (content.verse == 1)
-              ? content.verse.toString()
-              : convertVerseNumberToSuperScript(),
+          text: (isFirstVerse) ? '1 ' : convertVerseNumberToSuperScript(),
           children: [
             TextSpan(
               text: content.text,
               style: commonPassageStyle,
             ),
           ],
-          style: (content.verse == 1) ? firstVerseStyle : commonVerseStyle,
+          style: (isFirstVerse) ? firstVerseStyle : commonVerseStyle,
         ),
+        textAlign: TextAlign.justify,
       );
     }
   }

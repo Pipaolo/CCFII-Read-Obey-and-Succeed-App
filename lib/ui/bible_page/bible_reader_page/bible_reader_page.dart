@@ -126,6 +126,10 @@ class _BibleReaderPageState extends State<BibleReaderPage> {
                   padding: const EdgeInsets.symmetric(vertical: 5),
                   child: BiblePassageWidget(
                     content: e,
+                    isFirstVerse:
+                        (widget.chapter.content.first.verse == e.verse)
+                            ? true
+                            : false,
                   ),
                 ))
             .toList());
