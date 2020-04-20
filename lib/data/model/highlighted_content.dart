@@ -1,8 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 
-import 'package:ccfii_read_obey_succeed/data/model/bible_chapter_content.dart';
+import 'bible_chapter_content.dart';
 
 class HighlightedContent {
   final List<BibleChapterContent> chapterContents;

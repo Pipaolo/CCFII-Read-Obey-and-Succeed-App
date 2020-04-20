@@ -11,12 +11,14 @@ import 'package:ccfii_read_obey_succeed/ui/splash_page/splash_page.dart';
 import 'package:ccfii_read_obey_succeed/ui/bible_page/bible_book_page/bible_book_page.dart';
 import 'package:ccfii_read_obey_succeed/ui/bible_page/bible_reader_page/bible_reader_page.dart';
 import 'package:ccfii_read_obey_succeed/data/model/bible_chapter.dart';
+import 'package:ccfii_read_obey_succeed/ui/profile_page/highlights_page/highlights_page.dart';
 import 'package:ccfii_read_obey_succeed/ui/bottom_navigation_controller.dart';
 
 abstract class Routes {
   static const splashPageRoute = '/';
   static const bibleBookPageRoute = '/bible-book-page-route';
   static const bibleReaderPageRoute = '/bible-reader-page-route';
+  static const highlightsPageRoute = '/highlights-page-route';
   static const bottomNavigationControllerRoute =
       '/bottom-navigation-controller-route';
 }
@@ -61,6 +63,16 @@ class Router extends RouterBase {
               .wrappedRoute,
           settings: settings,
         );
+      case Routes.highlightsPageRoute:
+        if (hasInvalidArgs<HighlightsPageArguments>(args)) {
+          return misTypedArgsRoute<HighlightsPageArguments>(args);
+        }
+        final typedArgs =
+            args as HighlightsPageArguments ?? HighlightsPageArguments();
+        return MaterialPageRoute<dynamic>(
+          builder: (_) => HighlightsPage(key: typedArgs.key),
+          settings: settings,
+        );
       case Routes.bottomNavigationControllerRoute:
         if (hasInvalidArgs<BottomNavigationControllerArguments>(args)) {
           return misTypedArgsRoute<BottomNavigationControllerArguments>(args);
@@ -96,6 +108,12 @@ class BibleReaderPageArguments {
   final String bookTitle;
   BibleReaderPageArguments(
       {this.key, @required this.chapter, @required this.bookTitle});
+}
+
+//HighlightsPage arguments holder class
+class HighlightsPageArguments {
+  final Key key;
+  HighlightsPageArguments({this.key});
 }
 
 //BottomNavigationController arguments holder class

@@ -24,6 +24,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           headline6: TextStyle(color: Colors.white),
           headline5: TextStyle(color: Colors.white),
           headline4: TextStyle(color: Colors.white),
+          headline1: TextStyle(color: Colors.white),
           bodyText1: TextStyle(color: Colors.white),
         ),
       );
@@ -36,6 +37,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           headline6: TextStyle(color: Colors.black),
           headline5: TextStyle(color: Colors.black),
           headline4: TextStyle(color: Colors.black),
+          headline1: TextStyle(color: Colors.black),
           bodyText1: TextStyle(color: Colors.black),
         ),
       );
