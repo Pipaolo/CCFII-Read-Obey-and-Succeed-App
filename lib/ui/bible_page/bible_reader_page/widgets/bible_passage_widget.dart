@@ -1,7 +1,9 @@
+import 'package:ccfii_read_obey_succeed/ui/bible_page/bible_reader_page/bloc/passage/passage_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 
-import '../../../../core/styling.dart';
+import '../../../../core/colors.dart';
 import '../../../../data/model/bible_chapter_content.dart';
 
 class BiblePassageWidget extends StatelessWidget {
@@ -28,47 +30,29 @@ class BiblePassageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (content.text.contains('[pas_title]')) {
-      return Text.rich(
-        TextSpan(
-          text: content.passageTitle + '\n',
-          children: [
-            TextSpan(
-              text: (isFirstVerse)
-                  ? content.verse.toString()
-                  : convertVerseNumberToSuperScript(),
-              style: (isFirstVerse) ? firstVerseStyle : commonVerseStyle,
-            ),
-            TextSpan(
-              text: content.text.replaceAll('[pas_title]', ''),
-              style: commonPassageStyle,
-            ),
-          ],
-          style: TextStyle(
-            fontSize: ScreenUtil().setSp(70),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        textAlign: TextAlign.justify,
-      );
-    } else {
-      return Text.rich(
-        TextSpan(
-          text: (isFirstVerse) ? '1 ' : convertVerseNumberToSuperScript(),
-          children: [
-            TextSpan(
-              text: content.text,
-              style: commonPassageStyle,
-            ),
-          ],
-          style: (isFirstVerse) ? firstVerseStyle : commonVerseStyle,
-        ),
-        textAlign: TextAlign.justify,
-      );
-    }
+    return BlocBuilder<PassageBloc, PassageState>(
+      builder: (context, state) {
+        bool isHighlighted = false;
+        if (state is PassageShowHighlight) {
+          for (final verse in state.highlightedVerses) {
+            for (final highlightedContent in verse.chapterContents) {
+              if (highlightedContent.verse == content.verse &&
+                  highlightedContent.chapterNumber == content.chapterNumber) {
+                isHighlighted = true;
+              }
+            }
+          }
+        }
+        if (content.text.contains('[pas_title]')) {
+          return _buildPassageWithTitleInline(context, isHighlighted);
+        } else {
+          return _buildDefaultPassage(context, isHighlighted);
+        }
+      },
+    );
   }
 
-  String convertVerseNumberToSuperScript() {
+  String _convertVerseNumberToSuperScript() {
     //Convert the verse number to strings
     //After converting then turn it into a list
     final verseString = content.verse.toString();
@@ -78,5 +62,99 @@ class BiblePassageWidget extends StatelessWidget {
         .toList()
         .join();
     return '$convertedVerseString ';
+  }
+
+  void _highlightVerse(BuildContext context) {
+    context.bloc<PassageBloc>()
+      ..add(PassageHighlighted(contentHighlighted: content));
+  }
+
+  void _removeHighlight(BuildContext context) {
+    context.bloc<PassageBloc>()
+      ..add(PassageHighlightRemoved(contentHighlighted: content));
+  }
+
+  Widget _buildDefaultPassage(BuildContext context, bool isHighlighted) {
+    return SelectableText.rich(
+        TextSpan(
+            text: (isFirstVerse) ? '1' : _convertVerseNumberToSuperScript(),
+            children: [
+              TextSpan(
+                text: ' ${content.text}',
+                style: Theme.of(context).textTheme.bodyText1.copyWith(
+                      fontSize: ScreenUtil().setSp(50),
+                      fontFamily: 'Times New Roman',
+                      decoration: (isHighlighted)
+                          ? TextDecoration.underline
+                          : TextDecoration.none,
+                      backgroundColor:
+                          (isHighlighted) ? Colors.yellow : Colors.transparent,
+                    ),
+              ),
+            ],
+            style: (isFirstVerse)
+                ? Theme.of(context).textTheme.headline5.copyWith(
+                      fontSize: ScreenUtil().setSp(80),
+                      fontWeight: FontWeight.bold,
+                      color: ccfiiRed,
+                      fontFamily: 'Times New Roman',
+                    )
+                : Theme.of(context).textTheme.headline5.copyWith(
+                      fontSize: ScreenUtil().setSp(80),
+                      fontWeight: FontWeight.bold,
+                      color: ccfiiRed,
+                      fontFamily: 'Times New Roman',
+                    )),
+        textAlign: TextAlign.justify,
+        showCursor: false, onTap: () {
+      if (!isHighlighted) {
+        _highlightVerse(context);
+      } else {
+        _removeHighlight(context);
+      }
+    });
+  }
+
+  Widget _buildPassageWithTitleInline(
+      BuildContext context, bool isHighlighted) {
+    return SelectableText.rich(
+      TextSpan(
+          text: content.passageTitle + '\n',
+          children: [
+            TextSpan(
+              text: (isFirstVerse)
+                  ? content.verse.toString()
+                  : _convertVerseNumberToSuperScript(),
+              style: (isFirstVerse)
+                  ? Theme.of(context).textTheme.headline5.copyWith(
+                        fontSize: ScreenUtil().setSp(80),
+                        fontWeight: FontWeight.bold,
+                        color: ccfiiRed,
+                        fontFamily: 'Times New Roman',
+                      )
+                  : Theme.of(context).textTheme.headline5.copyWith(
+                        fontSize: ScreenUtil().setSp(80),
+                        fontWeight: FontWeight.bold,
+                        color: ccfiiRed,
+                        fontFamily: 'Times New Roman',
+                      ),
+            ),
+            TextSpan(
+              text: content.text.replaceAll('[pas_title]', ''),
+              style: Theme.of(context).textTheme.bodyText1.copyWith(
+                    fontFamily: 'Times New Roman',
+                  ),
+            ),
+          ],
+          style: Theme.of(context).textTheme.headline5),
+      textAlign: TextAlign.justify,
+      onTap: () {
+        if (!isHighlighted) {
+          _highlightVerse(context);
+        } else {
+          _removeHighlight(context);
+        }
+      },
+    );
   }
 }

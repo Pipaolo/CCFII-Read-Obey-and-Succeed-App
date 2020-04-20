@@ -7,7 +7,6 @@ import 'bible_page/bible_page.dart';
 import 'home_page/home_page.dart';
 import 'profile_page/profile_page.dart';
 import 'ros_page/ros_page.dart';
-import 'widgets/app_bar.dart';
 import 'widgets/bottom_navigation_bar.dart';
 
 class BottomNavigationController extends StatelessWidget
@@ -24,7 +23,6 @@ class BottomNavigationController extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
       body: BlocListener<BottomNavigationBloc, int>(
         listener: (context, currentIndex) {
           pageController.jumpToPage(currentIndex);

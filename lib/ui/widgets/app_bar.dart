@@ -2,7 +2,7 @@ import 'package:ccfii_read_obey_succeed/core/bottom_navigation_bloc/bottom_navig
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+class CustomAppBar extends StatelessWidget {
   CustomAppBar({Key key}) : super(key: key);
 
   final TextStyle textStyle = TextStyle(
@@ -41,7 +41,4 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       }),
     );
   }
-
-  @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }

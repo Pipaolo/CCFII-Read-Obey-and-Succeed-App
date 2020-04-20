@@ -1,5 +1,7 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:ccfii_read_obey_succeed/core/setting_bloc/settings_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 
 class BibleReaderOverlay extends StatelessWidget {
@@ -18,7 +20,7 @@ class BibleReaderOverlay extends StatelessWidget {
     return Stack(
       children: <Widget>[
         _buildTopOverlay(context),
-        _buildBottomOverlay(context),
+        // _buildBottomOverlay(context),
       ],
     );
   }
@@ -50,6 +52,27 @@ class BibleReaderOverlay extends StatelessWidget {
                     color: Colors.white,
                   ),
                   onPressed: () => ExtendedNavigator.of(context).pop(),
+                ),
+              ),
+              Center(
+                child: BlocBuilder<SettingsBloc, SettingsState>(
+                  builder: (context, state) {
+                    bool isDarkMode = false;
+                    if (state is SettingsUpdated) {
+                      isDarkMode = state.isDarkMode;
+                    }
+                    return Switch(
+                        onChanged: (value) {
+                          if (value) {
+                            context.bloc<SettingsBloc>()
+                              ..add(DarkThemePressed());
+                          } else {
+                            context.bloc<SettingsBloc>()
+                              ..add(LightThemePressed());
+                          }
+                        },
+                        value: isDarkMode);
+                  },
                 ),
               ),
             ],
@@ -97,6 +120,17 @@ class BibleReaderOverlay extends StatelessWidget {
                   ),
                   onPressed: () => ExtendedNavigator.of(context).pop(),
                 ),
+              ),
+              Positioned(
+                right: 0,
+                top: 0,
+                bottom: 0,
+                child: IconButton(
+                    icon: Icon(
+                      Icons.settings,
+                      color: Colors.white,
+                    ),
+                    onPressed: () => null),
               ),
             ],
           ),

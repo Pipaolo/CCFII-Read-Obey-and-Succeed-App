@@ -1,37 +1,37 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:ccfii_read_obey_succeed/data/repository/bible_repository.dart';
+import 'package:ccfii_read_obey_succeed/core/hive_bloc/hive_bloc.dart';
+import 'package:ccfii_read_obey_succeed/core/setting_bloc/settings_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../routes/router.gr.dart';
-import 'bible_page/bloc/bible_page/bible_page_bloc.dart';
 
 class AppWidget extends StatelessWidget {
   const AppWidget({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MultiRepositoryProvider(
-      providers: [
-        RepositoryProvider<BibleRepository>(
-          create: (context) => BibleRepository(),
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<HiveBloc, HiveState>(
+          listener: (context, state) {
+            if (state == HiveState.success) {
+              print('Hive Configured');
+            } else if (state == HiveState.error) {
+              print('Hive Bloc Error!');
+            }
+          },
         ),
       ],
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider<BiblePageBloc>(
-            create: (context) => BiblePageBloc(
-              bibleRepository: context.repository<BibleRepository>(),
-            )..add(
-                BiblePageStarted(),
-              ),
-          )
-        ],
-        child: MaterialApp(
-          builder: ExtendedNavigator<Router>(
-            router: Router(),
-          ),
-        ),
+      child: BlocBuilder<SettingsBloc, SettingsState>(
+        builder: (context, state) {
+          return MaterialApp(
+            theme: context.bloc<SettingsBloc>().currentTheme,
+            builder: ExtendedNavigator<Router>(
+              router: Router(),
+            ),
+          );
+        },
       ),
     );
   }

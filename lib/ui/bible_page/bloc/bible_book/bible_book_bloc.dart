@@ -36,14 +36,16 @@ class BibleBookBloc extends Bloc<BibleBookEvent, BibleBookState> {
             numberOfChapters: bookRaw['number_of_chapters'],
             id: bookRaw['id'],
             chapters: (bookRaw['chapters'] as List<dynamic>)
-                .map((e) => BibleChapter(
-                    title: e['chapter_title'],
-                    number: e['chapter_number'],
-                    content: (e['chapter_content'] as List<dynamic>)
-                        .map((e) => BibleChapterContent(
-                            passageTitle: e['passage_title'],
-                            text: e['text'],
-                            verse: int.parse(e['verse'])))
+                .map((chapterRaw) => BibleChapter(
+                    title: chapterRaw['chapter_title'],
+                    number: chapterRaw['chapter_number'],
+                    content: (chapterRaw['chapter_content'] as List<dynamic>)
+                        .map((contentRaw) => BibleChapterContent(
+                            bookId: bookRaw['id'],
+                            chapterNumber: chapterRaw['chapter_number'],
+                            passageTitle: contentRaw['passage_title'],
+                            text: contentRaw['text'],
+                            verse: int.parse(contentRaw['verse'])))
                         .toList()))
                 .toList());
 

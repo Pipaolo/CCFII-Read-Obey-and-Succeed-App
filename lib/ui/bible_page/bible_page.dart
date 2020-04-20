@@ -1,3 +1,4 @@
+import 'package:ccfii_read_obey_succeed/ui/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -37,6 +38,7 @@ class BiblePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          CustomAppBar(),
           BibleListing(
             directories: otDirectories,
             title: 'Old Testament',
