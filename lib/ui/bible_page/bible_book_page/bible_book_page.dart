@@ -34,7 +34,7 @@ class BibleBookPage extends StatelessWidget implements AutoRouteWrapper {
           if (state is BibleBookLoading) {
             return _buildLoading();
           } else if (state is BibleBookSuccess) {
-            return _buildSuccess(state.bibleBook);
+            return _buildSuccess(state.bibleBook, context);
           } else if (state is BibleBookError) {
             return _buildError();
           }
@@ -50,21 +50,20 @@ class BibleBookPage extends StatelessWidget implements AutoRouteWrapper {
     );
   }
 
-  _buildSuccess(BibleBook book) {
+  _buildSuccess(BibleBook book, BuildContext context) {
     return CustomScrollView(
       slivers: <Widget>[
         SliverAppBar(
           title: Text(
             book.title,
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: ScreenUtil().setSp(60),
-            ),
+            style: Theme.of(context).textTheme.headline6.copyWith(
+                  fontWeight: FontWeight.w500,
+                  fontSize: ScreenUtil().setSp(70),
+                ),
           ),
           pinned: true,
           centerTitle: true,
-          iconTheme: IconThemeData(color: Colors.black),
+          iconTheme: Theme.of(context).iconTheme,
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),

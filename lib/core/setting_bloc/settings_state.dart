@@ -9,11 +9,17 @@ class SettingsInitial extends SettingsState {
   List<Object> get props => [];
 }
 
-class SettingsUpdated extends SettingsState {
+class ShowUpdatedSettings extends SettingsState {
   final bool isDarkMode;
-  SettingsUpdated({
-    this.isDarkMode,
+  final ReaderFontSizes textFontSizes;
+  final ReaderFontStyles textFontStyles;
+
+  ShowUpdatedSettings({
+    @required this.isDarkMode,
+    @required this.textFontSizes,
+    @required this.textFontStyles,
   });
+
   @override
-  List<Object> get props => [isDarkMode];
+  List<Object> get props => [isDarkMode, textFontSizes, textFontStyles];
 }

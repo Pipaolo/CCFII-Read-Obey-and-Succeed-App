@@ -28,6 +28,12 @@ class BottomNavigationController extends StatelessWidget
           pageController.jumpToPage(currentIndex);
         },
         child: PageView(
+          onPageChanged: (index) {
+            context.bloc<BottomNavigationBloc>()
+              ..add(
+                BottomNavigationItemPressed(index: index),
+              );
+          },
           children: <Widget>[
             HomePage(),
             BiblePage(),

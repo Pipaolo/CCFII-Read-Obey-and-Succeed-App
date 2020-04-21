@@ -42,7 +42,6 @@ class PassageBloc extends Bloc<PassageEvent, PassageState> {
     } else if (event is PassageHighlightedFetched) {
       try {
         final highlightedVerses = await hiveRepository.fetchHighlightedVerses();
-        print(highlightedVerses.length);
         if (highlightedVerses.length != 0) {
           yield PassageShowHighlight(highlightedVerses: highlightedVerses);
         } else {

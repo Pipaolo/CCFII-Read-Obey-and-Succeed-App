@@ -142,7 +142,7 @@ packages:
     source: hosted
     version: "0.3.1"
   charcode:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: charcode
       url: "https://pub.dartlang.org"
@@ -169,6 +169,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.14.12"
+  color_models:
+    dependency: transitive
+    description:
+      name: color_models
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.8"
   convert:
     dependency: transitive
     description:
@@ -265,6 +272,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.2.0"
+  flutter_color_models:
+    dependency: "direct main"
+    description:
+      name: flutter_color_models
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.6"
+  flutter_colorpicker:
+    dependency: "direct main"
+    description:
+      name: flutter_colorpicker
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.4"
   flutter_icons:
     dependency: "direct main"
     description:
@@ -272,13 +293,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0"
-  flutter_material_color_picker:
-    dependency: "direct main"
-    description:
-      name: flutter_material_color_picker
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.5"
   flutter_screenutil:
     dependency: "direct main"
     description:

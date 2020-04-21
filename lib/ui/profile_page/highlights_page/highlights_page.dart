@@ -1,8 +1,10 @@
-import 'package:ccfii_read_obey_succeed/ui/bible_page/bible_reader_page/bloc/passage/passage_bloc.dart';
-import 'package:ccfii_read_obey_succeed/ui/bible_page/bloc/bible_page/bible_page_bloc.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+
+import '../../bible_page/bible_reader_page/bloc/passage/passage_bloc.dart';
+import 'widgets/highlights_card.dart';
 
 class HighlightsPage extends StatelessWidget {
   const HighlightsPage({Key key}) : super(key: key);
@@ -14,8 +16,17 @@ class HighlightsPage extends StatelessWidget {
         body: CustomScrollView(
           slivers: <Widget>[
             SliverToBoxAdapter(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: IconButton(
+                  icon: Icon(Icons.arrow_back),
+                  onPressed: () => ExtendedNavigator.of(context).pop(),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Text(
                   'Highlights',
                   style: Theme.of(context).textTheme.headline1.copyWith(
@@ -31,41 +42,9 @@ class HighlightsPage extends StatelessWidget {
                 if (state is PassageShowHighlight) {
                   return SliverList(
                     delegate: SliverChildBuilderDelegate((context, i) {
-                      final verse = state.highlightedVerses[i];
-                      final bookTitle = context
-                          .bloc<BiblePageBloc>()
-                          .bibleDirectories
-                          .firstWhere((element) => element.id
-                              .contains(verse.chapterContents.first.bookId))
-                          .title;
-                      final bookChapter =
-                          verse.chapterContents.first.chapterNumber;
-                      final verseRange =
-                          '${verse.chapterContents.first.verse}:${verse.chapterContents.last.verse}';
-                      return Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text('$bookTitle $bookChapter $verseRange',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headline5
-                                      .copyWith(
-                                        fontSize: ScreenUtil().setSp(60),
-                                      )),
-                              Divider(
-                                thickness: 2,
-                              ),
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              Text('$bookTitle $bookChapter $verseRange',
-                                  style: Theme.of(context).textTheme.headline5),
-                            ],
-                          ),
-                        ),
+                      final content = state.highlightedVerses[i];
+                      return HighlightsCard(
+                        content: content,
                       );
                     }, childCount: state.highlightedVerses.length),
                   );

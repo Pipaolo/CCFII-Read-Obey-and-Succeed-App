@@ -1,10 +1,9 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:ccfii_read_obey_succeed/core/colors.dart';
-import 'package:ccfii_read_obey_succeed/routes/router.gr.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/screenutil.dart';
 
-import 'package:ccfii_read_obey_succeed/data/model/bible_directory.dart';
-
+import '../../../data/model/bible_directory.dart';
+import '../../../routes/router.gr.dart';
 import 'bible_category_title.dart';
 
 class BibleListing extends StatelessWidget {
@@ -27,7 +26,7 @@ class BibleListing extends StatelessWidget {
               ? const EdgeInsets.fromLTRB(0, 30, 20, 0)
               : const EdgeInsets.fromLTRB(20, 30, 0, 0),
           child: Material(
-            color: ccfiiLightOrange,
+            color: Theme.of(context).accentColor,
             borderRadius: BorderRadius.circular(20),
             child: Container(
               padding: const EdgeInsets.only(top: 30),
@@ -38,7 +37,13 @@ class BibleListing extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final bibleDirectory = directories[index];
                   return ListTile(
-                    title: Text(bibleDirectory.title),
+                    title: Text(
+                      bibleDirectory.title,
+                      style: Theme.of(context).textTheme.bodyText1.copyWith(
+                            fontWeight: FontWeight.w800,
+                            fontSize: ScreenUtil().setSp(50),
+                          ),
+                    ),
                     trailing: Icon(Icons.arrow_forward),
                     onTap: () => ExtendedNavigator.of(context).pushNamed(
                       Routes.bibleBookPageRoute,

@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:ccfii_read_obey_succeed/core/hive_bloc/hive_bloc.dart';
 import 'package:ccfii_read_obey_succeed/core/setting_bloc/settings_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,28 +10,15 @@ class AppWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<HiveBloc, HiveState>(
-          listener: (context, state) {
-            if (state == HiveState.success) {
-              print('Hive Configured');
-            } else if (state == HiveState.error) {
-              print('Hive Bloc Error!');
-            }
-          },
-        ),
-      ],
-      child: BlocBuilder<SettingsBloc, SettingsState>(
-        builder: (context, state) {
-          return MaterialApp(
-            theme: context.bloc<SettingsBloc>().currentTheme,
-            builder: ExtendedNavigator<Router>(
-              router: Router(),
-            ),
-          );
-        },
-      ),
+    return BlocBuilder<SettingsBloc, SettingsState>(
+      builder: (context, state) {
+        return MaterialApp(
+          theme: context.bloc<SettingsBloc>().currentTheme,
+          builder: ExtendedNavigator<Router>(
+            router: Router(),
+          ),
+        );
+      },
     );
   }
 }

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 
-import 'package:ccfii_read_obey_succeed/core/colors.dart';
-
 class BibleCategoryTitle extends StatelessWidget {
   final String title;
   final bool isLeft;
@@ -17,7 +15,7 @@ class BibleCategoryTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: ccfiiRed,
+        color: Theme.of(context).primaryColor,
         borderRadius: (isLeft)
             ? BorderRadius.only(
                 topRight: Radius.circular(80),

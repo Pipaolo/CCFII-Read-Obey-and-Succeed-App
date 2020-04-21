@@ -1,8 +1,9 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:ccfii_read_obey_succeed/core/setting_bloc/settings_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+
+import '../../../../routes/router.gr.dart';
+import '../../../widgets/settings_dialog.dart';
 
 class BibleReaderOverlay extends StatelessWidget {
   final String bookTitle;
@@ -14,6 +15,14 @@ class BibleReaderOverlay extends StatelessWidget {
     @required this.chapterNumber,
     @required this.isShown,
   }) : super(key: key);
+
+  _showSettingsDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return SettingsDialog();
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,27 +63,27 @@ class BibleReaderOverlay extends StatelessWidget {
                   onPressed: () => ExtendedNavigator.of(context).pop(),
                 ),
               ),
-              Center(
-                child: BlocBuilder<SettingsBloc, SettingsState>(
-                  builder: (context, state) {
-                    bool isDarkMode = false;
-                    if (state is SettingsUpdated) {
-                      isDarkMode = state.isDarkMode;
-                    }
-                    return Switch(
-                        onChanged: (value) {
-                          if (value) {
-                            context.bloc<SettingsBloc>()
-                              ..add(DarkThemePressed());
-                          } else {
-                            context.bloc<SettingsBloc>()
-                              ..add(LightThemePressed());
-                          }
-                        },
-                        value: isDarkMode);
-                  },
-                ),
-              ),
+              // Center(
+              //   child: BlocBuilder<SettingsBloc, SettingsState>(
+              //     builder: (context, state) {
+              //       bool isDarkMode = false;
+              //       if (state is ShowUpdatedSettings) {
+              //         isDarkMode = state.isDarkMode;
+              //       }
+              //       return Switch(
+              //           onChanged: (value) {
+              //             if (value) {
+              //               context.bloc<SettingsBloc>()
+              //                 ..add(DarkModeEnabled());
+              //             } else {
+              //               context.bloc<SettingsBloc>()
+              //                 ..add(LightThemePressed());
+              //             }
+              //           },
+              //           value: isDarkMode);
+              //     },
+              //   ),
+              // ),
             ],
           ),
         ),
@@ -118,7 +127,8 @@ class BibleReaderOverlay extends StatelessWidget {
                     Icons.arrow_back,
                     color: Colors.white,
                   ),
-                  onPressed: () => ExtendedNavigator.of(context).pop(),
+                  onPressed: () => ExtendedNavigator.of(context)
+                      .popUntil(ModalRoute.withName(Routes.bibleBookPageRoute)),
                 ),
               ),
               Positioned(
@@ -130,7 +140,7 @@ class BibleReaderOverlay extends StatelessWidget {
                       Icons.settings,
                       color: Colors.white,
                     ),
-                    onPressed: () => null),
+                    onPressed: () => _showSettingsDialog(context)),
               ),
             ],
           ),

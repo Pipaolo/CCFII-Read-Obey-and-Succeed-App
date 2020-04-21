@@ -1,12 +1,13 @@
-import 'package:ccfii_read_obey_succeed/ui/bible_page/bible_reader_page/bloc/passage/passage_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/screenutil.dart';
 
-import '../../../../core/colors.dart';
 import '../../../../data/model/bible_chapter_content.dart';
+import '../../../widgets/passage_text_default.dart';
+import '../../../widgets/passage_text_with_title.dart';
+import '../bloc/bible_reader_bottom_sheet/bible_reader_bottom_sheet_bloc.dart';
+import '../bloc/passage/passage_bloc.dart';
 
-class BiblePassageWidget extends StatelessWidget {
+class BiblePassageWidget extends StatefulWidget {
   final BibleChapterContent content;
   final String bookId;
   final bool isFirstVerse;
@@ -17,147 +18,91 @@ class BiblePassageWidget extends StatelessWidget {
     @required this.bookId,
   }) : super(key: key);
 
-  static const Map<String, int> superScriptCharCodes = {
-    '0': 0x2070,
-    '1': 0x00B9,
-    '2': 0x00B2,
-    '3': 0x00B3,
-    '4': 0x2074,
-    '5': 0x2075,
-    '6': 0x2076,
-    '7': 0x2077,
-    '8': 0x2078,
-    '9': 0x2079,
-  };
+  @override
+  _BiblePassageWidgetState createState() => _BiblePassageWidgetState();
+}
+
+class _BiblePassageWidgetState extends State<BiblePassageWidget> {
+  final focusNode = FocusNode();
+  bool isHighlighted = false;
+
+  _onFocusChanged() {
+    if (isHighlighted) {
+      context.bloc<BibleReaderBottomSheetBloc>()
+        ..add(PassageSheetShowed(verse: widget.content));
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    focusNode.addListener(_onFocusChanged);
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PassageBloc, PassageState>(
       builder: (context, state) {
-        bool isHighlighted = false;
+        Color highlightColor;
+
         if (state is PassageShowHighlight) {
           for (final verse in state.highlightedVerses) {
             for (final highlightedContent in verse.chapterContents) {
-              if (highlightedContent.verse == content.verse &&
-                  highlightedContent.chapterNumber == content.chapterNumber &&
-                  highlightedContent.bookId == bookId) {
-                isHighlighted = true;
+              if (highlightedContent.verse == widget.content.verse &&
+                  highlightedContent.chapterNumber ==
+                      widget.content.chapterNumber &&
+                  highlightedContent.bookId == widget.bookId) {
+                Future.delayed(
+                  Duration.zero,
+                  () => setState(() => isHighlighted = true),
+                );
+                final highlightColorRGB = verse.highlightColor;
+
+                if (highlightColorRGB != null) {
+                  highlightColor = Color.fromRGBO(highlightColorRGB[0],
+                      highlightColorRGB[1], highlightColorRGB[2], 1);
+                }
               }
             }
           }
         }
-        if (content.text.contains('[pas_title]')) {
-          return _buildPassageWithTitleInline(context, isHighlighted);
+
+        if (widget.content.text.contains('[pas_title]')) {
+          return PassageTextWithTitle(
+            content: widget.content,
+            highlightedPressed: () => _highlightVerse(context),
+            removeHighlightPressed: () => _removeHighlight(context),
+            isFirstVerse: widget.isFirstVerse,
+            isHighlighted: isHighlighted,
+            highlightColor: highlightColor,
+            focusNode: focusNode,
+          );
         } else {
-          return _buildDefaultPassage(context, isHighlighted);
+          return PassageTextDefault(
+            content: widget.content,
+            highlightedPressed: () => _highlightVerse(context),
+            removeHighlightPressed: () => _removeHighlight(context),
+            isFirstVerse: widget.isFirstVerse,
+            isHighlighted: isHighlighted,
+            highlightColor: highlightColor,
+            focusNode: focusNode,
+          );
         }
       },
     );
-  }
-
-  String _convertVerseNumberToSuperScript() {
-    //Convert the verse number to strings
-    //After converting then turn it into a list
-    final verseString = content.verse.toString();
-    final verseSplitted = verseString.split('');
-    final convertedVerseString = verseSplitted
-        .map((e) => String.fromCharCode(superScriptCharCodes[e]))
-        .toList()
-        .join();
-    return '$convertedVerseString ';
   }
 
   void _highlightVerse(BuildContext context) {
     context.bloc<PassageBloc>()
-      ..add(PassageHighlighted(contentHighlighted: content));
+      ..add(PassageHighlighted(contentHighlighted: widget.content));
+    context.bloc<BibleReaderBottomSheetBloc>()
+      ..add(PassageSheetShowed(verse: widget.content));
   }
 
   void _removeHighlight(BuildContext context) {
     context.bloc<PassageBloc>()
-      ..add(PassageHighlightRemoved(contentHighlighted: content));
-  }
+      ..add(PassageHighlightRemoved(contentHighlighted: widget.content));
 
-  Widget _buildDefaultPassage(BuildContext context, bool isHighlighted) {
-    return SelectableText.rich(
-        TextSpan(
-            text: (isFirstVerse) ? '1' : _convertVerseNumberToSuperScript(),
-            children: [
-              TextSpan(
-                text: ' ${content.text}',
-                style: Theme.of(context).textTheme.bodyText1.copyWith(
-                      fontSize: ScreenUtil().setSp(50),
-                      fontFamily: 'Times New Roman',
-                      decoration: (isHighlighted)
-                          ? TextDecoration.underline
-                          : TextDecoration.none,
-                      backgroundColor:
-                          (isHighlighted) ? Colors.yellow : Colors.transparent,
-                    ),
-              ),
-            ],
-            style: (isFirstVerse)
-                ? Theme.of(context).textTheme.headline5.copyWith(
-                      fontSize: ScreenUtil().setSp(80),
-                      fontWeight: FontWeight.bold,
-                      color: ccfiiRed,
-                      fontFamily: 'Times New Roman',
-                    )
-                : Theme.of(context).textTheme.headline5.copyWith(
-                      fontSize: ScreenUtil().setSp(80),
-                      fontWeight: FontWeight.bold,
-                      color: ccfiiRed,
-                      fontFamily: 'Times New Roman',
-                    )),
-        textAlign: TextAlign.justify,
-        showCursor: false, onTap: () {
-      if (!isHighlighted) {
-        _highlightVerse(context);
-      } else {
-        _removeHighlight(context);
-      }
-    });
-  }
-
-  Widget _buildPassageWithTitleInline(
-      BuildContext context, bool isHighlighted) {
-    return SelectableText.rich(
-      TextSpan(
-          text: content.passageTitle + '\n',
-          children: [
-            TextSpan(
-              text: (isFirstVerse)
-                  ? content.verse.toString()
-                  : _convertVerseNumberToSuperScript(),
-              style: (isFirstVerse)
-                  ? Theme.of(context).textTheme.headline5.copyWith(
-                        fontSize: ScreenUtil().setSp(80),
-                        fontWeight: FontWeight.bold,
-                        color: ccfiiRed,
-                        fontFamily: 'Times New Roman',
-                      )
-                  : Theme.of(context).textTheme.headline5.copyWith(
-                        fontSize: ScreenUtil().setSp(80),
-                        fontWeight: FontWeight.bold,
-                        color: ccfiiRed,
-                        fontFamily: 'Times New Roman',
-                      ),
-            ),
-            TextSpan(
-              text: content.text.replaceAll('[pas_title]', ''),
-              style: Theme.of(context).textTheme.bodyText1.copyWith(
-                    fontFamily: 'Times New Roman',
-                  ),
-            ),
-          ],
-          style: Theme.of(context).textTheme.headline5),
-      textAlign: TextAlign.justify,
-      onTap: () {
-        if (!isHighlighted) {
-          _highlightVerse(context);
-        } else {
-          _removeHighlight(context);
-        }
-      },
-    );
+    context.bloc<BibleReaderBottomSheetBloc>()..add(PassageSheetClosed());
   }
 }

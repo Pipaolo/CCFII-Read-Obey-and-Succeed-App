@@ -1,16 +1,107 @@
+import 'dart:ui';
+
+import 'package:ccfii_read_obey_succeed/core/setting_bloc/settings_bloc.dart';
 import 'package:ccfii_read_obey_succeed/data/model/bible_chapter_content.dart';
 import 'package:ccfii_read_obey_succeed/data/model/highlighted_content.dart';
+import 'package:ccfii_read_obey_succeed/data/model/settings.dart';
 import 'package:hive/hive.dart';
 import 'package:dartx/dartx.dart';
 
 class HiveRepository {
-  Future<void> changeThemeMode(String mode) async {
-    try {
-      final box = await Hive.openBox('themeMode');
-      await box.put('theme', mode);
-    } catch (e) {
-      print('ChangeThemeMode: $e');
+  Future<void> updateSettings(Settings settings) async {
+    final box = await Hive.openBox('settings');
+
+    int fontSize;
+    int fontStyle;
+
+    switch (settings.textFontSize) {
+      case ReaderFontSizes.large:
+        fontSize = 0;
+        break;
+      case ReaderFontSizes.normal:
+        fontSize = 1;
+        break;
+      case ReaderFontSizes.small:
+        fontSize = 2;
+        break;
     }
+
+    switch (settings.textFontStyle) {
+      case ReaderFontStyles.normal:
+        fontStyle = 0;
+        break;
+      case ReaderFontStyles.modern:
+        fontStyle = 1;
+        break;
+      case ReaderFontStyles.old:
+        fontStyle = 2;
+        break;
+    }
+
+    await box.put('currentSettings', {
+      'isDarkModeEnabled': settings.isDarkModeEnabled,
+      'textFontSize': fontSize,
+      'textFontStyle': fontStyle,
+    });
+  }
+
+  Future<Settings> fetchSettings() async {
+    final box = await Hive.openBox('settings');
+    final currentSettingsRaw = await box.get('currentSettings', defaultValue: {
+      'isDarkModeEnabled': false,
+      'textFontSize': 1,
+      'textFontStyle': 1,
+    });
+    ReaderFontSizes fontSize;
+    ReaderFontStyles fontStyle;
+    switch (currentSettingsRaw['textFontSize']) {
+      case 0:
+        fontSize = ReaderFontSizes.small;
+        break;
+      case 1:
+        fontSize = ReaderFontSizes.small;
+        break;
+      case 2:
+        fontSize = ReaderFontSizes.small;
+        break;
+    }
+    switch (currentSettingsRaw['textFontSize']) {
+      case 0:
+        fontStyle = ReaderFontStyles.old;
+        break;
+      case 1:
+        fontStyle = ReaderFontStyles.normal;
+        break;
+      case 2:
+        fontStyle = ReaderFontStyles.modern;
+        break;
+    }
+
+    return Settings(
+      isDarkModeEnabled: currentSettingsRaw['isDarkModeEnabled'],
+      textFontSize: fontSize,
+      textFontStyle: fontStyle,
+    );
+  }
+
+  Future<void> changeHighlightColor(
+      BibleChapterContent selectedVerse, Color color) async {
+    final Box highlightedVerseBox = await Hive.openBox('highlightedVerses');
+    final List<dynamic> currentValue =
+        highlightedVerseBox.get(selectedVerse.bookId, defaultValue: []);
+    final verseLocation =
+        await getMatchedHighlightedVersePosition(currentValue, selectedVerse);
+    final contentPos = verseLocation['highlightedContentIndex'];
+    final currentVerses = currentValue[contentPos]['verseHighlighted'];
+    final colorValue = [color.red, color.green, color.blue];
+    final updatedValue = currentValue.toList();
+    updatedValue[contentPos] = {
+      'verseHighlighted': currentVerses,
+      'highlightColor': colorValue,
+    };
+
+    // print(updatedValue);
+    highlightedVerseBox.put(selectedVerse.bookId, updatedValue);
   }
 
   Future<bool> checkForExisitingVerse(
@@ -148,7 +239,7 @@ class HiveRepository {
         final updatedValue = currentValue.toList();
         updatedValue.add({
           'verseHighlighted': [highlightedVerse.toJson()],
-          'highlightColor': [255, 212, 146],
+          'highlightColor': null,
         });
         highlightedVerseBox.put(highlightedVerse.bookId, updatedValue);
       }
@@ -195,7 +286,7 @@ class HiveRepository {
         if (updatedValue.length == 1) {
           updatedValue.removeAt(contentPos);
         } else {
-          updatedValue.removeAt((contentPos == 0) ? 0 : contentPos - 1);
+          updatedValue.removeAt((contentPos == 0) ? 0 : contentPos);
         }
 
         highlightedVerseBox.put(highlightedVerse.bookId, updatedValue);

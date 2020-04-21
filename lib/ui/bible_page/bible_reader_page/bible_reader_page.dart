@@ -1,5 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:ccfii_read_obey_succeed/core/colors.dart';
+import 'package:ccfii_read_obey_succeed/data/repository/hive_repository.dart';
+import 'package:ccfii_read_obey_succeed/ui/bible_page/bible_reader_page/bloc/bible_reader_bottom_sheet/bible_reader_bottom_sheet_bloc.dart';
+import 'package:ccfii_read_obey_succeed/ui/bible_page/bible_reader_page/widgets/bible_reader_bottom_sheet.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -25,8 +28,18 @@ class BibleReaderPage extends StatefulWidget implements AutoRouteWrapper {
     @required this.bookId,
   }) : super(key: key);
   @override
-  Widget get wrappedRoute => BlocProvider<BibleReaderOverlayBloc>(
-        create: (context) => BibleReaderOverlayBloc(),
+  Widget get wrappedRoute => MultiBlocProvider(
+        providers: [
+          BlocProvider<BibleReaderOverlayBloc>(
+            create: (context) => BibleReaderOverlayBloc(),
+          ),
+          BlocProvider<BibleReaderBottomSheetBloc>(
+            create: (context) => BibleReaderBottomSheetBloc(
+              passageBloc: context.bloc<PassageBloc>(),
+              hiveRepository: context.repository<HiveRepository>(),
+            ),
+          )
+        ],
         child: this,
       );
 
@@ -51,7 +64,6 @@ class _BibleReaderPageState extends State<BibleReaderPage> {
       },
     ),
   );
-
   final Flushbar highlightRemovedFlushbar = Flushbar(
     message: 'Highlight Removed',
     margin: const EdgeInsets.all(10),
@@ -66,13 +78,128 @@ class _BibleReaderPageState extends State<BibleReaderPage> {
     ),
   );
 
-  BibleReaderOverlayBloc overlayBloc;
+  BibleReaderOverlayBloc _overlayBloc;
+  PersistentBottomSheetController _controller;
+  bool _isBottomSheetOpened = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async {
+        print('hello');
+        return false;
+      },
+      child: SafeArea(
+        child: Scaffold(
+          key: _key,
+          body: MultiBlocListener(
+            listeners: [
+              BlocListener<PassageBloc, PassageState>(
+                listener: (context, state) {
+                  _handleHighlightingStates(context, state);
+                },
+              ),
+              BlocListener<BibleReaderBottomSheetBloc,
+                  BibleReaderBottomSheetState>(
+                listener: (context, state) async {
+                  if (state is ShowBibleReaderBottomSheet &&
+                      !_isBottomSheetOpened) {
+                    _controller = showBottomSheet(
+                        context: context,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            topRight: Radius.circular(20),
+                          ),
+                        ),
+                        builder: (context) {
+                          return BibleReaderBottomSheet(
+                              bookId: widget.bookId, chapter: widget.chapter);
+                        });
+
+                    setState(() => _isBottomSheetOpened = true);
+                    if (await _controller.closed == null) {
+                      setState(() => _isBottomSheetOpened = false);
+                      context.bloc<BibleReaderBottomSheetBloc>()
+                        ..add(PassageSheetClosed());
+                    }
+                  } else if (state is BibleReaderBottomSheetHidden) {
+                    if (_isBottomSheetOpened) {
+                      _controller.close();
+                      setState(() => _isBottomSheetOpened = false);
+                    }
+                  }
+                },
+              ),
+            ],
+            child: Container(
+              height: MediaQuery.of(context).size.height,
+              child: Stack(
+                children: <Widget>[
+                  Positioned.fill(
+                    child: GestureDetector(
+                      onTap: () {
+                        if (_overlayBloc.state ==
+                            BibleReaderOverlayState.overlayShown) {
+                          _overlayBloc.add(BibleReaderOverlayEvent.overlayHide);
+                        } else {
+                          _overlayBloc
+                              .add(BibleReaderOverlayEvent.overlayShowed);
+                        }
+                      },
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              const SizedBox(
+                                height: kToolbarHeight + 20,
+                              ),
+                              if ('${widget.bookTitle} ${widget.chapter.number}' !=
+                                  widget.chapter.title)
+                                Text(
+                                  widget.chapter.title,
+                                  style: TextStyle(
+                                    fontSize: ScreenUtil().setSp(60),
+                                    color: ccfiiRed,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              _buildChapterContent(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  BlocBuilder<BibleReaderOverlayBloc, BibleReaderOverlayState>(
+                    builder: (context, state) {
+                      return BibleReaderOverlay(
+                        bookTitle: widget.bookTitle,
+                        chapterNumber: widget.chapter.number.toString(),
+                        isShown: (state == BibleReaderOverlayState.overlayShown)
+                            ? true
+                            : false,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   scrollListener() {
     final scrollDirection = scrollController.position.userScrollDirection;
     if (scrollDirection == ScrollDirection.forward) {
-      overlayBloc.add(BibleReaderOverlayEvent.overlayShowed);
+      _overlayBloc.add(BibleReaderOverlayEvent.overlayShowed);
     } else if (scrollDirection == ScrollDirection.reverse) {
-      overlayBloc.add(BibleReaderOverlayEvent.overlayHide);
+      _overlayBloc.add(BibleReaderOverlayEvent.overlayHide);
     }
   }
 
@@ -80,101 +207,36 @@ class _BibleReaderPageState extends State<BibleReaderPage> {
   void initState() {
     super.initState();
     scrollController.addListener(scrollListener);
-    overlayBloc = context.bloc<BibleReaderOverlayBloc>();
+    _overlayBloc = context.bloc<BibleReaderOverlayBloc>();
   }
 
   @override
   void dispose() {
-    overlayBloc.close();
+    _overlayBloc.close();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocListener<PassageBloc, PassageState>(
-      listener: (context, state) {
-        if (state is PassageShowHighlight) {
-          if (state.isAdded != null) {
-            if (state.isAdded) {
-              highlightRemovedFlushbar..dismiss();
-              highlightAddedFlushbar
-                ..dismiss()
-                ..show(context);
-            } else {
-              highlightAddedFlushbar..dismiss();
-              highlightRemovedFlushbar
-                ..dismiss()
-                ..show(context);
-            }
-          }
-        } else if (state is PassageHighlightEmpty) {
+  _handleHighlightingStates(BuildContext context, PassageState state) {
+    if (state is PassageShowHighlight) {
+      if (state.isAdded != null) {
+        if (state.isAdded) {
+          highlightRemovedFlushbar..dismiss();
+          highlightAddedFlushbar
+            ..dismiss()
+            ..show(context);
+        } else {
           highlightAddedFlushbar..dismiss();
           highlightRemovedFlushbar
             ..dismiss()
             ..show(context);
         }
-      },
-      child: SafeArea(
-        child: Scaffold(
-          key: _key,
-          body: Container(
-            height: MediaQuery.of(context).size.height,
-            child: Stack(
-              children: <Widget>[
-                Positioned.fill(
-                  child: GestureDetector(
-                    onTap: () {
-                      if (overlayBloc.state ==
-                          BibleReaderOverlayState.overlayShown) {
-                        overlayBloc.add(BibleReaderOverlayEvent.overlayHide);
-                      } else {
-                        overlayBloc.add(BibleReaderOverlayEvent.overlayShowed);
-                      }
-                    },
-                    child: SingleChildScrollView(
-                      controller: scrollController,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            const SizedBox(
-                              height: kToolbarHeight + 20,
-                            ),
-                            if ('${widget.bookTitle} ${widget.chapter.number}' !=
-                                widget.chapter.title)
-                              Text(
-                                widget.chapter.title,
-                                style: TextStyle(
-                                  fontSize: ScreenUtil().setSp(60),
-                                  color: ccfiiRed,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            _buildChapterContent(),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                BlocBuilder<BibleReaderOverlayBloc, BibleReaderOverlayState>(
-                  builder: (context, state) {
-                    return BibleReaderOverlay(
-                      bookTitle: widget.bookTitle,
-                      chapterNumber: widget.chapter.number.toString(),
-                      isShown: (state == BibleReaderOverlayState.overlayShown)
-                          ? true
-                          : false,
-                    );
-                  },
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+      }
+    } else if (state is PassageHighlightEmpty) {
+      highlightAddedFlushbar..dismiss();
+      highlightRemovedFlushbar
+        ..dismiss()
+        ..show(context);
+    }
   }
 
   _buildChapterContent() {
