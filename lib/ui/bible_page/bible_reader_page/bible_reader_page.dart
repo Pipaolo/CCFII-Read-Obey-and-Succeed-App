@@ -84,109 +84,102 @@ class _BibleReaderPageState extends State<BibleReaderPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        print('hello');
-        return false;
-      },
-      child: SafeArea(
-        child: Scaffold(
-          key: _key,
-          body: MultiBlocListener(
-            listeners: [
-              BlocListener<PassageBloc, PassageState>(
-                listener: (context, state) {
-                  _handleHighlightingStates(context, state);
-                },
-              ),
-              BlocListener<BibleReaderBottomSheetBloc,
-                  BibleReaderBottomSheetState>(
-                listener: (context, state) async {
-                  if (state is ShowBibleReaderBottomSheet &&
-                      !_isBottomSheetOpened) {
-                    _controller = showBottomSheet(
-                        context: context,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            topRight: Radius.circular(20),
-                          ),
+    return SafeArea(
+      child: Scaffold(
+        key: _key,
+        body: MultiBlocListener(
+          listeners: [
+            BlocListener<PassageBloc, PassageState>(
+              listener: (context, state) {
+                _handleHighlightingStates(context, state);
+              },
+            ),
+            BlocListener<BibleReaderBottomSheetBloc,
+                BibleReaderBottomSheetState>(
+              listener: (context, state) async {
+                if (state is ShowBibleReaderBottomSheet &&
+                    !_isBottomSheetOpened) {
+                  _controller = showBottomSheet(
+                      context: context,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20),
                         ),
-                        builder: (context) {
-                          return BibleReaderBottomSheet(
-                              bookId: widget.bookId, chapter: widget.chapter);
-                        });
+                      ),
+                      builder: (context) {
+                        return BibleReaderBottomSheet(
+                            bookId: widget.bookId, chapter: widget.chapter);
+                      });
 
-                    setState(() => _isBottomSheetOpened = true);
-                    if (await _controller.closed == null) {
-                      setState(() => _isBottomSheetOpened = false);
-                      context.bloc<BibleReaderBottomSheetBloc>()
-                        ..add(PassageSheetClosed());
-                    }
-                  } else if (state is BibleReaderBottomSheetHidden) {
-                    if (_isBottomSheetOpened) {
-                      _controller.close();
-                      setState(() => _isBottomSheetOpened = false);
-                    }
+                  setState(() => _isBottomSheetOpened = true);
+                  if (await _controller.closed == null) {
+                    setState(() => _isBottomSheetOpened = false);
+                    context.bloc<BibleReaderBottomSheetBloc>()
+                      ..add(PassageSheetClosed());
                   }
-                },
-              ),
-            ],
-            child: Container(
-              height: MediaQuery.of(context).size.height,
-              child: Stack(
-                children: <Widget>[
-                  Positioned.fill(
-                    child: GestureDetector(
-                      onTap: () {
-                        if (_overlayBloc.state ==
-                            BibleReaderOverlayState.overlayShown) {
-                          _overlayBloc.add(BibleReaderOverlayEvent.overlayHide);
-                        } else {
-                          _overlayBloc
-                              .add(BibleReaderOverlayEvent.overlayShowed);
-                        }
-                      },
-                      child: SingleChildScrollView(
-                        controller: scrollController,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              const SizedBox(
-                                height: kToolbarHeight + 20,
-                              ),
-                              if ('${widget.bookTitle} ${widget.chapter.number}' !=
-                                  widget.chapter.title)
-                                Text(
-                                  widget.chapter.title,
-                                  style: TextStyle(
-                                    fontSize: ScreenUtil().setSp(60),
-                                    color: ccfiiRed,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                } else if (state is BibleReaderBottomSheetHidden) {
+                  if (_isBottomSheetOpened) {
+                    _controller.close();
+                    setState(() => _isBottomSheetOpened = false);
+                  }
+                }
+              },
+            ),
+          ],
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            child: Stack(
+              children: <Widget>[
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: () {
+                      if (_overlayBloc.state ==
+                          BibleReaderOverlayState.overlayShown) {
+                        _overlayBloc.add(BibleReaderOverlayEvent.overlayHide);
+                      } else {
+                        _overlayBloc.add(BibleReaderOverlayEvent.overlayShowed);
+                      }
+                    },
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            const SizedBox(
+                              height: kToolbarHeight + 20,
+                            ),
+                            if ('${widget.bookTitle} ${widget.chapter.number}' !=
+                                widget.chapter.title)
+                              Text(
+                                widget.chapter.title,
+                                style: TextStyle(
+                                  fontSize: ScreenUtil().setSp(60),
+                                  color: ccfiiRed,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              _buildChapterContent(),
-                            ],
-                          ),
+                              ),
+                            _buildChapterContent(),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                  BlocBuilder<BibleReaderOverlayBloc, BibleReaderOverlayState>(
-                    builder: (context, state) {
-                      return BibleReaderOverlay(
-                        bookTitle: widget.bookTitle,
-                        chapterNumber: widget.chapter.number.toString(),
-                        isShown: (state == BibleReaderOverlayState.overlayShown)
-                            ? true
-                            : false,
-                      );
-                    },
-                  ),
-                ],
-              ),
+                ),
+                BlocBuilder<BibleReaderOverlayBloc, BibleReaderOverlayState>(
+                  builder: (context, state) {
+                    return BibleReaderOverlay(
+                      bookTitle: widget.bookTitle,
+                      chapterNumber: widget.chapter.number.toString(),
+                      isShown: (state == BibleReaderOverlayState.overlayShown)
+                          ? true
+                          : false,
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ),

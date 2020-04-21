@@ -30,6 +30,8 @@ class _BiblePassageWidgetState extends State<BiblePassageWidget> {
     if (isHighlighted) {
       context.bloc<BibleReaderBottomSheetBloc>()
         ..add(PassageSheetShowed(verse: widget.content));
+    } else {
+      context.bloc<BibleReaderBottomSheetBloc>()..add(PassageSheetClosed());
     }
   }
 
@@ -57,7 +59,6 @@ class _BiblePassageWidgetState extends State<BiblePassageWidget> {
                   () => setState(() => isHighlighted = true),
                 );
                 final highlightColorRGB = verse.highlightColor;
-
                 if (highlightColorRGB != null) {
                   highlightColor = Color.fromRGBO(highlightColorRGB[0],
                       highlightColorRGB[1], highlightColorRGB[2], 1);
@@ -100,6 +101,7 @@ class _BiblePassageWidgetState extends State<BiblePassageWidget> {
   }
 
   void _removeHighlight(BuildContext context) {
+    setState(() => isHighlighted = false);
     context.bloc<PassageBloc>()
       ..add(PassageHighlightRemoved(contentHighlighted: widget.content));
 
