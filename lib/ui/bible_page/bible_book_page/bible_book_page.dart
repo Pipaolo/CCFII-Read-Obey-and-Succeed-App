@@ -88,6 +88,7 @@ class BibleBookPage extends StatelessWidget implements AutoRouteWrapper {
                       arguments: BibleReaderPageArguments(
                         chapter: chapter,
                         bookTitle: book.title,
+                        bookId: book.id,
                       ),
                     ),
                     child: Center(

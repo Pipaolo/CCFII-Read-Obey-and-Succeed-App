@@ -8,11 +8,13 @@ import '../../../../data/model/bible_chapter_content.dart';
 
 class BiblePassageWidget extends StatelessWidget {
   final BibleChapterContent content;
+  final String bookId;
   final bool isFirstVerse;
   const BiblePassageWidget({
     Key key,
     @required this.content,
     @required this.isFirstVerse,
+    @required this.bookId,
   }) : super(key: key);
 
   static const Map<String, int> superScriptCharCodes = {
@@ -37,7 +39,8 @@ class BiblePassageWidget extends StatelessWidget {
           for (final verse in state.highlightedVerses) {
             for (final highlightedContent in verse.chapterContents) {
               if (highlightedContent.verse == content.verse &&
-                  highlightedContent.chapterNumber == content.chapterNumber) {
+                  highlightedContent.chapterNumber == content.chapterNumber &&
+                  highlightedContent.bookId == bookId) {
                 isHighlighted = true;
               }
             }

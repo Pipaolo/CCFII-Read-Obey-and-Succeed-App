@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 
 import '../../../data/model/bible_chapter.dart';
+import '../../../routes/router.gr.dart';
 import 'bloc/bible_reader_overlay/bible_reader_overlay_bloc.dart';
 import 'bloc/passage/passage_bloc.dart';
 import 'widgets/bible_passage_widget.dart';
@@ -15,11 +16,13 @@ import 'widgets/bible_reader_overlay.dart';
 class BibleReaderPage extends StatefulWidget implements AutoRouteWrapper {
   final BibleChapter chapter;
   final String bookTitle;
+  final String bookId;
 
   BibleReaderPage({
     Key key,
     @required this.chapter,
     @required this.bookTitle,
+    @required this.bookId,
   }) : super(key: key);
   @override
   Widget get wrappedRoute => BlocProvider<BibleReaderOverlayBloc>(
@@ -35,7 +38,7 @@ class _BibleReaderPageState extends State<BibleReaderPage> {
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
   final ScrollController scrollController = ScrollController();
 
-  final Flushbar hightlightAddedFlushbar = Flushbar(
+  final Flushbar highlightAddedFlushbar = Flushbar(
     message: 'Highlight Added',
     margin: const EdgeInsets.all(10),
     duration: Duration(seconds: 2),
@@ -43,7 +46,9 @@ class _BibleReaderPageState extends State<BibleReaderPage> {
     borderRadius: 10,
     mainButton: FlatButton(
       child: Text('See Highlights', style: TextStyle(color: ccfiiLightOrange)),
-      onPressed: () {},
+      onPressed: () {
+        ExtendedNavigator.rootNavigator.pushNamed(Routes.highlightsPageRoute);
+      },
     ),
   );
 
@@ -55,7 +60,9 @@ class _BibleReaderPageState extends State<BibleReaderPage> {
     flushbarPosition: FlushbarPosition.TOP,
     mainButton: FlatButton(
       child: Text('See Highlights', style: TextStyle(color: ccfiiLightOrange)),
-      onPressed: () {},
+      onPressed: () {
+        ExtendedNavigator.rootNavigator.pushNamed(Routes.highlightsPageRoute);
+      },
     ),
   );
 
@@ -90,18 +97,18 @@ class _BibleReaderPageState extends State<BibleReaderPage> {
           if (state.isAdded != null) {
             if (state.isAdded) {
               highlightRemovedFlushbar..dismiss();
-              hightlightAddedFlushbar
+              highlightAddedFlushbar
                 ..dismiss()
                 ..show(context);
             } else {
-              hightlightAddedFlushbar..dismiss();
+              highlightAddedFlushbar..dismiss();
               highlightRemovedFlushbar
                 ..dismiss()
                 ..show(context);
             }
           }
         } else if (state is PassageHighlightEmpty) {
-          hightlightAddedFlushbar..dismiss();
+          highlightAddedFlushbar..dismiss();
           highlightRemovedFlushbar
             ..dismiss()
             ..show(context);
@@ -173,15 +180,19 @@ class _BibleReaderPageState extends State<BibleReaderPage> {
   _buildChapterContent() {
     return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: widget.chapter.content
-            .map((e) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: BiblePassageWidget(
-                    content: e,
-                    isFirstVerse:
-                        (widget.chapter.content.indexOf(e) == 0) ? true : false,
-                  ),
-                ))
-            .toList());
+        children: widget.chapter.content.map((e) {
+          final bool isFirstVerse =
+              (widget.chapter.content.indexOf(e) == 0) ? true : false;
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: BiblePassageWidget(
+              content: e.copyWith(
+                verse: (isFirstVerse) ? 1 : e.verse,
+              ),
+              bookId: widget.bookId,
+              isFirstVerse: isFirstVerse,
+            ),
+          );
+        }).toList());
   }
 }

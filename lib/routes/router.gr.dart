@@ -59,7 +59,8 @@ class Router extends RouterBase {
           builder: (_) => BibleReaderPage(
                   key: typedArgs.key,
                   chapter: typedArgs.chapter,
-                  bookTitle: typedArgs.bookTitle)
+                  bookTitle: typedArgs.bookTitle,
+                  bookId: typedArgs.bookId)
               .wrappedRoute,
           settings: settings,
         );
@@ -106,8 +107,12 @@ class BibleReaderPageArguments {
   final Key key;
   final BibleChapter chapter;
   final String bookTitle;
+  final String bookId;
   BibleReaderPageArguments(
-      {this.key, @required this.chapter, @required this.bookTitle});
+      {this.key,
+      @required this.chapter,
+      @required this.bookTitle,
+      @required this.bookId});
 }
 
 //HighlightsPage arguments holder class

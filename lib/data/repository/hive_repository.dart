@@ -28,9 +28,15 @@ class HiveRepository {
                   text: verse['text'],
                   verse: verse['verse']))
               .toList();
-      if (verses.contains(verse)) {
-        hasMatch = true;
 
+      if (verses
+          .where((element) =>
+              element.bookId == verse.bookId &&
+              element.chapterNumber == verse.chapterNumber &&
+              verse.verse == element.verse)
+          .toList()
+          .isNotEmpty) {
+        hasMatch = true;
         break;
       }
     }
@@ -51,11 +57,13 @@ class HiveRepository {
                   text: verse['text'],
                   verse: verse['verse']))
               .toList();
+
       if (verses.contains(verse)) {
         highlightedVerseIndex = verses.indexOf(verse);
-        highlightedContentIndex++;
         break;
       }
+
+      highlightedContentIndex++;
     }
     return {
       'highlightedVerseIndex': highlightedVerseIndex,
@@ -77,9 +85,12 @@ class HiveRepository {
                   text: content['text'],
                   verse: content['verse']))
               .toList();
+
       for (final verse in verses) {
         final diff = (verse.verse - highlightedVerse.verse).abs();
-        if (diff == 1) {
+        if (diff == 1 &&
+            verse.chapterNumber == highlightedVerse.chapterNumber &&
+            verse.bookId == highlightedVerse.bookId) {
           neighborLocations.add(index);
         }
       }
@@ -116,7 +127,6 @@ class HiveRepository {
         //After fetching the first value in the list then proceed in adding the verse to the
         // current verse
         verseContents.add(highlightedVerse.toJson());
-
         if (highlightedVersesToMergePositions.length != 1) {
           for (int pos in highlightedVersesToMergePositions.getRange(
               1, highlightedVersesToMergePositions.length)) {
@@ -125,7 +135,6 @@ class HiveRepository {
             currentValue.removeAt(pos);
           }
         }
-
         currentValue[highlightedVersesToMergePositions.first] = {
           'verseHighlighted': verseContents,
           'hightlightColor': firstHighlightedContentRaw['highlightColor'],
@@ -165,11 +174,11 @@ class HiveRepository {
           currentValue, highlightedVerse);
       final itemPos = highlightedContentPos['highlightedVerseIndex'];
       final contentPos = highlightedContentPos['highlightedContentIndex'];
-      final highlightedContentRaw = currentValue[contentPos - 1];
+      final highlightedContentRaw = currentValue[contentPos];
       final List<dynamic> highlightedVerses =
           highlightedContentRaw['verseHighlighted'];
       final seperatedVersesFront =
-          highlightedVerses.sublist(itemPos + 1).toList();
+          highlightedVerses.sublist((itemPos + 1)).toList();
       final diff = highlightedVerses.length - seperatedVersesFront.length;
       final seperatedVersesBack =
           highlightedVerses.sublist(0, diff - 1).toList();
@@ -184,9 +193,9 @@ class HiveRepository {
         }
 
         if (updatedValue.length == 1) {
-          updatedValue.removeAt(contentPos - 1);
-        } else {
           updatedValue.removeAt(contentPos);
+        } else {
+          updatedValue.removeAt((contentPos == 0) ? 0 : contentPos - 1);
         }
 
         highlightedVerseBox.put(highlightedVerse.bookId, updatedValue);
@@ -195,7 +204,7 @@ class HiveRepository {
           'verseHighlighted': seperatedVersesFront,
           'highlightColor': highlightedContentRaw['highlightColor'],
         });
-        updatedValue.removeAt(contentPos - 1);
+        updatedValue.removeAt(contentPos);
         highlightedVerseBox.put(highlightedVerse.bookId, updatedValue);
       } else {
         updatedValue.add({
@@ -206,7 +215,7 @@ class HiveRepository {
           'verseHighlighted': seperatedVersesBack,
           'highlightColor': highlightedContentRaw['highlightColor'],
         });
-        updatedValue.removeAt(contentPos - 1);
+        updatedValue.removeAt(contentPos);
         highlightedVerseBox.put(highlightedVerse.bookId, updatedValue);
       }
     }
