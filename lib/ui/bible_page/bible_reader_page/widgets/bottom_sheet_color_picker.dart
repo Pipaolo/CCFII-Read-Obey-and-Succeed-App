@@ -5,7 +5,11 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 
 class BottomSheetColorPicker extends StatelessWidget {
-  const BottomSheetColorPicker({Key key}) : super(key: key);
+  final Color currentColor;
+  const BottomSheetColorPicker({
+    Key key,
+    @required this.currentColor,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +68,7 @@ class BottomSheetColorPicker extends StatelessWidget {
             },
           );
         },
-        pickerColor: Colors.amber,
+        pickerColor: (currentColor != null) ? currentColor : Colors.amber,
       ),
     );
   }

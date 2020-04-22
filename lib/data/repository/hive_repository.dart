@@ -208,13 +208,11 @@ class HiveRepository {
       //Check if there are available verses to be merged
       final highlightedVersesToMergePositions =
           await checkNeighborsToMerge(currentValue, highlightedVerse);
-
       if (highlightedVersesToMergePositions.length > 0) {
         final firstHighlightedContentRaw =
             currentValue[highlightedVersesToMergePositions.first];
         final List<dynamic> verseContents =
             firstHighlightedContentRaw['verseHighlighted'];
-
         //After fetching the first value in the list then proceed in adding the verse to the
         // current verse
         verseContents.add(highlightedVerse.toJson());
@@ -239,7 +237,7 @@ class HiveRepository {
         final updatedValue = currentValue.toList();
         updatedValue.add({
           'verseHighlighted': [highlightedVerse.toJson()],
-          'highlightColor': null,
+          'highlightColor': [255, 212, 146],
         });
         highlightedVerseBox.put(highlightedVerse.bookId, updatedValue);
       }

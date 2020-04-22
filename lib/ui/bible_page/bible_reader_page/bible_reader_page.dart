@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:ccfii_read_obey_succeed/core/colors.dart';
 import 'package:ccfii_read_obey_succeed/data/repository/hive_repository.dart';
+import 'package:ccfii_read_obey_succeed/ui/bible_page/bible_reader_page/bloc/bible_passage/bible_passage_bloc.dart';
 import 'package:ccfii_read_obey_succeed/ui/bible_page/bible_reader_page/bloc/bible_reader_bottom_sheet/bible_reader_bottom_sheet_bloc.dart';
 import 'package:ccfii_read_obey_succeed/ui/bible_page/bible_reader_page/widgets/bible_reader_bottom_sheet.dart';
 import 'package:flushbar/flushbar.dart';
@@ -12,7 +13,6 @@ import 'package:flutter_screenutil/screenutil.dart';
 import '../../../data/model/bible_chapter.dart';
 import '../../../routes/router.gr.dart';
 import 'bloc/bible_reader_overlay/bible_reader_overlay_bloc.dart';
-import 'bloc/passage/passage_bloc.dart';
 import 'widgets/bible_passage_widget.dart';
 import 'widgets/bible_reader_overlay.dart';
 
@@ -35,7 +35,7 @@ class BibleReaderPage extends StatefulWidget implements AutoRouteWrapper {
           ),
           BlocProvider<BibleReaderBottomSheetBloc>(
             create: (context) => BibleReaderBottomSheetBloc(
-              passageBloc: context.bloc<PassageBloc>(),
+              passageBloc: context.bloc<BiblePassageBloc>(),
               hiveRepository: context.repository<HiveRepository>(),
             ),
           )
@@ -89,7 +89,7 @@ class _BibleReaderPageState extends State<BibleReaderPage> {
         key: _key,
         body: MultiBlocListener(
           listeners: [
-            BlocListener<PassageBloc, PassageState>(
+            BlocListener<BiblePassageBloc, BiblePassageState>(
               listener: (context, state) {
                 _handleHighlightingStates(context, state);
               },
@@ -109,11 +109,15 @@ class _BibleReaderPageState extends State<BibleReaderPage> {
                       ),
                       builder: (context) {
                         return BibleReaderBottomSheet(
-                            bookId: widget.bookId, chapter: widget.chapter);
+                            bookId: widget.bookId,
+                            chapter: widget.chapter,
+                            currentHighlightColor: state.color);
                       });
 
                   setState(() => _isBottomSheetOpened = true);
-                  if (await _controller.closed == null) {
+
+                  if (await _controller.closed == null &&
+                      _isBottomSheetOpened) {
                     setState(() => _isBottomSheetOpened = false);
                     context.bloc<BibleReaderBottomSheetBloc>()
                       ..add(PassageSheetClosed());
@@ -209,8 +213,8 @@ class _BibleReaderPageState extends State<BibleReaderPage> {
     super.dispose();
   }
 
-  _handleHighlightingStates(BuildContext context, PassageState state) {
-    if (state is PassageShowHighlight) {
+  _handleHighlightingStates(BuildContext context, BiblePassageState state) {
+    if (state is BiblePassageShowHighlight) {
       if (state.isAdded != null) {
         if (state.isAdded) {
           highlightRemovedFlushbar..dismiss();
@@ -224,7 +228,7 @@ class _BibleReaderPageState extends State<BibleReaderPage> {
             ..show(context);
         }
       }
-    } else if (state is PassageHighlightEmpty) {
+    } else if (state is BiblePassageHighlightEmpty) {
       highlightAddedFlushbar..dismiss();
       highlightRemovedFlushbar
         ..dismiss()

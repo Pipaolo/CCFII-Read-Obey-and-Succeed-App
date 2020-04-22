@@ -25,7 +25,7 @@ class HighlightsCardHeader extends StatelessWidget {
     String verseRange = '';
     if (content.chapterContents.length > 1) {
       verseRange =
-          '${content.chapterContents.first.verse}:${content.chapterContents.last.verse}';
+          '${content.chapterContents.first.verse}-${content.chapterContents.last.verse}';
     } else {
       verseRange = content.chapterContents.first.verse.toString();
     }
@@ -35,7 +35,7 @@ class HighlightsCardHeader extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text('$bookTitle $bookChapter $verseRange',
+            Text('$bookTitle $bookChapter:$verseRange',
                 style: Theme.of(context).textTheme.headline5.copyWith(
                       fontSize: ScreenUtil().setSp(60),
                     )),

@@ -10,6 +10,13 @@ class BibleReaderBottomSheetHidden extends BibleReaderBottomSheetState {
 }
 
 class ShowBibleReaderBottomSheet extends BibleReaderBottomSheetState {
+  final HighlightedContent content;
+  final Color color;
+  ShowBibleReaderBottomSheet({
+    this.content,
+    this.color,
+  });
+
   @override
-  List<Object> get props => [];
+  List<Object> get props => [content, color];
 }

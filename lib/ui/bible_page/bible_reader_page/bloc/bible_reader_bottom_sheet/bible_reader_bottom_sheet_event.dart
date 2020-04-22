@@ -6,11 +6,13 @@ abstract class BibleReaderBottomSheetEvent extends Equatable {
 
 class PassageSheetShowed extends BibleReaderBottomSheetEvent {
   final BibleChapterContent verse;
+  final HighlightedContent highlightedGroup;
   PassageSheetShowed({
     @required this.verse,
+    this.highlightedGroup,
   });
   @override
-  List<Object> get props => [];
+  List<Object> get props => [verse, highlightedGroup];
 }
 
 class PassageSheetClosed extends BibleReaderBottomSheetEvent {

@@ -1,9 +1,9 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:ccfii_read_obey_succeed/ui/bible_page/bible_reader_page/bloc/bible_passage/bible_passage_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 
-import '../../bible_page/bible_reader_page/bloc/passage/passage_bloc.dart';
 import 'widgets/highlights_card.dart';
 
 class HighlightsPage extends StatelessWidget {
@@ -37,18 +37,21 @@ class HighlightsPage extends StatelessWidget {
                 ),
               ),
             ),
-            BlocBuilder<PassageBloc, PassageState>(
+            BlocBuilder<BiblePassageBloc, BiblePassageState>(
               builder: (context, state) {
-                if (state is PassageShowHighlight) {
+                if (state is BiblePassageShowHighlight) {
                   return SliverList(
-                    delegate: SliverChildBuilderDelegate((context, i) {
-                      final content = state.highlightedVerses[i];
-                      return HighlightsCard(
-                        content: content,
-                      );
-                    }, childCount: state.highlightedVerses.length),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, i) {
+                        final content = state.highlightedVerses[i];
+                        return HighlightsCard(
+                          content: content,
+                        );
+                      },
+                      childCount: state.highlightedVerses.length,
+                    ),
                   );
-                } else if (state is PassageHighlightEmpty) {
+                } else if (state is BiblePassageHighlightEmpty) {
                   return SliverFillRemaining(
                       child: Container(
                     alignment: Alignment.center,

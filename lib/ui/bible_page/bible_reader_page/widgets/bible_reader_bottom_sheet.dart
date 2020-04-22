@@ -7,10 +7,12 @@ import 'bottom_sheet_color_picker.dart';
 class BibleReaderBottomSheet extends StatefulWidget {
   final String bookId;
   final BibleChapter chapter;
+  final Color currentHighlightColor;
   const BibleReaderBottomSheet({
     Key key,
     @required this.bookId,
     @required this.chapter,
+    @required this.currentHighlightColor,
   }) : super(key: key);
 
   @override
@@ -37,7 +39,9 @@ class _BibleReaderBottomSheetState extends State<BibleReaderBottomSheet> {
             height: 5,
             width: 40,
           ),
-          BottomSheetColorPicker(),
+          BottomSheetColorPicker(
+            currentColor: widget.currentHighlightColor,
+          ),
         ],
       ),
     );

@@ -9,46 +9,47 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../../../data/model/bible_chapter_content.dart';
 import '../../../../../data/repository/hive_repository.dart';
 
-part 'passage_event.dart';
-part 'passage_state.dart';
+part 'bible_passage_event.dart';
+part 'bible_passage_state.dart';
 
-class PassageBloc extends Bloc<PassageEvent, PassageState> {
+class BiblePassageBloc extends Bloc<BiblePassageEvent, BiblePassageState> {
   final HiveRepository hiveRepository;
-  PassageBloc({
+  BiblePassageBloc({
     @required this.hiveRepository,
   });
   @override
-  PassageState get initialState => PassageInitial();
+  BiblePassageState get initialState => BiblePassageInitial();
 
   @override
-  Stream<PassageState> mapEventToState(
-    PassageEvent event,
+  Stream<BiblePassageState> mapEventToState(
+    BiblePassageEvent event,
   ) async* {
-    if (event is PassageHighlighted) {
+    if (event is BiblePassageHighlighted) {
       await hiveRepository.addHighlightedVerses(event.contentHighlighted);
       final highlightedVerses = await hiveRepository.fetchHighlightedVerses();
 
-      yield PassageShowHighlight(
+      yield BiblePassageShowHighlight(
           highlightedVerses: highlightedVerses, isAdded: true);
-    } else if (event is PassageHighlightRemoved) {
+    } else if (event is BiblePassageHighlightRemoved) {
       await hiveRepository.removeHighlightedVerse(event.contentHighlighted);
       final highlightedVerses = await hiveRepository.fetchHighlightedVerses();
+
       if (highlightedVerses.isEmpty) {
-        yield PassageHighlightEmpty();
+        yield BiblePassageHighlightEmpty();
       } else {
-        yield PassageShowHighlight(
+        yield BiblePassageShowHighlight(
             highlightedVerses: highlightedVerses, isAdded: false);
       }
     } else if (event is PassageHighlightedFetched) {
       try {
         final highlightedVerses = await hiveRepository.fetchHighlightedVerses();
         if (highlightedVerses.length != 0) {
-          yield PassageShowHighlight(highlightedVerses: highlightedVerses);
+          yield BiblePassageShowHighlight(highlightedVerses: highlightedVerses);
         } else {
-          yield PassageHighlightEmpty();
+          yield BiblePassageHighlightEmpty();
         }
       } catch (e) {
-        yield PassageError(errorText: e.toString());
+        yield BiblePassageError(errorText: e.toString());
       }
     }
   }
