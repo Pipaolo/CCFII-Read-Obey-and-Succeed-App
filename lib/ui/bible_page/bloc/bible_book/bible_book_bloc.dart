@@ -45,7 +45,7 @@ class BibleBookBloc extends Bloc<BibleBookEvent, BibleBookState> {
                             chapterNumber: chapterRaw['chapter_number'],
                             passageTitle: contentRaw['passage_title'],
                             text: contentRaw['text'],
-                            verse: int.parse(contentRaw['verse'])))
+                            verse: int.tryParse(contentRaw['verse'])))
                         .toList()))
                 .toList());
 

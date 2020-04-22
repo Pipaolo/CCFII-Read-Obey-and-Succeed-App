@@ -15,50 +15,61 @@ class HighlightsCardHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bookTitle = context
-        .bloc<BiblePageBloc>()
-        .bibleDirectories
-        .firstWhere((element) =>
-            element.id.contains(content.chapterContents.first.bookId))
-        .title;
-    final bookChapter = content.chapterContents.first.chapterNumber;
-    String verseRange = '';
-    if (content.chapterContents.length > 1) {
-      verseRange =
-          '${content.chapterContents.first.verse}-${content.chapterContents.last.verse}';
-    } else {
-      verseRange = content.chapterContents.first.verse.toString();
-    }
+    return BlocBuilder<BiblePageBloc, BiblePageState>(
+        builder: (context, state) {
+      if (state is BiblePageSuccess) {
+        final bookTitle = context
+            .bloc<BiblePageBloc>()
+            .bibleDirectories
+            .firstWhere((element) =>
+                element.id.contains(content.chapterContents.first.bookId))
+            .title;
+        final bookChapter = content.chapterContents.first.chapterNumber;
 
-    return Stack(
-      children: <Widget>[
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        String verseRange = '';
+        if (content.chapterContents.length > 1) {
+          verseRange =
+              '${content.chapterContents.first.verse}-${content.chapterContents.last.verse}';
+        } else {
+          verseRange = content.chapterContents.first.verse.toString();
+        }
+
+        return Stack(
           children: <Widget>[
-            Text('$bookTitle $bookChapter:$verseRange',
-                style: Theme.of(context).textTheme.headline5.copyWith(
-                      fontSize: ScreenUtil().setSp(60),
-                    )),
-            Divider(
-              thickness: 2,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('$bookTitle $bookChapter:$verseRange',
+                    style: Theme.of(context).textTheme.headline5.copyWith(
+                          fontSize: ScreenUtil().setSp(60),
+                        )),
+                Divider(
+                  thickness: 2,
+                ),
+              ],
+            ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: (content.highlightColor != null)
+                      ? Color.fromRGBO(
+                          content.highlightColor[0],
+                          content.highlightColor[1],
+                          content.highlightColor[2],
+                          1)
+                      : ccfiiLightOrange,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                height: 5,
+                width: 30,
+              ),
             ),
           ],
-        ),
-        Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            decoration: BoxDecoration(
-              color: (content.highlightColor != null)
-                  ? Color.fromRGBO(content.highlightColor[0],
-                      content.highlightColor[1], content.highlightColor[2], 1)
-                  : ccfiiLightOrange,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            height: 5,
-            width: 30,
-          ),
-        ),
-      ],
-    );
+        );
+      }
+      //Return Container as a fallback
+      return Container();
+    });
   }
 }

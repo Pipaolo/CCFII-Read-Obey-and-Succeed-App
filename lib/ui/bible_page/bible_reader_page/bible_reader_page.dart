@@ -109,8 +109,6 @@ class _BibleReaderPageState extends State<BibleReaderPage> {
                       ),
                       builder: (context) {
                         return BibleReaderBottomSheet(
-                            bookId: widget.bookId,
-                            chapter: widget.chapter,
                             currentHighlightColor: state.color);
                       });
 
